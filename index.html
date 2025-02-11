@@ -1,0 +1,60 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Smart PDF Reader</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+  <div id="app">
+    <div id="sidebar">
+      <div id="thumbnails" class="thumbnail-container"></div>
+    </div>
+    
+    <div id="main">
+      <div id="toolbar">
+        <button id="openPdfBtn" class="tool-btn">
+          <i class="fas fa-folder-open"></i> Open
+        </button>
+        
+        <div class="tool-group">
+          <button id="highlighterBtn" class="tool-btn" title="Highlighter">
+            <i class="fas fa-highlighter"></i>
+          </button>
+          <button id="noteBtn" class="tool-btn" title="Add Note">
+            <i class="fas fa-sticky-note"></i>
+          </button>
+          <input type="color" id="colorPicker" class="color-picker" title="Select Color">
+        </div>
+
+        <div id="pageControls" class="tool-group">
+          <button id="prevPage" class="tool-btn">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span id="pageNum" class="page-counter">Page 1/1</span>
+          <button id="nextPage" class="tool-btn">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="pdfViewer">
+        <div id="pdfContainer">
+          <canvas id="pdfCanvas"></canvas>
+          <canvas id="annotationCanvas"></canvas>
+        </div>
+      </div>
+
+      <div id="statusBar">
+        <span id="statusText">Ready</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.worker.min.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

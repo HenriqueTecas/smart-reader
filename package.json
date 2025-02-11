@@ -1,0 +1,15 @@
+{
+  "name": "smart-pdf-reader",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^23.0.0"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^2.14.305"
+  }
+}
