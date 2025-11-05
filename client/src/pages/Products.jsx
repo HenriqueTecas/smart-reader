@@ -35,24 +35,24 @@ const Products = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-12">
+    <div className="bg-black min-h-screen py-16">
       <div className="container-custom">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="mb-12">
+          <h1 className="text-5xl font-bold text-white mb-4 tracking-tight">
             Our Products
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-400">
             Discover our range of premium ergonomic keyboards
           </p>
         </div>
 
         {/* Filters */}
-        <div className="card p-6 mb-8">
+        <div className="card p-6 mb-12">
           <div className="flex flex-col md:flex-row gap-4 items-center">
-            <div className="flex items-center space-x-2 text-gray-700">
+            <div className="flex items-center space-x-2 text-gray-400">
               <FiFilter />
-              <span className="font-semibold">Filters:</span>
+              <span className="font-medium">Filters:</span>
             </div>
 
             {/* Search */}
@@ -98,13 +98,13 @@ const Products = () => {
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-400">
               No products found. Try adjusting your filters.
             </p>
           </div>
         ) : (
           <>
-            <div className="mb-4 text-gray-600">
+            <div className="mb-6 text-gray-400 text-sm">
               Showing {products.length} product{products.length !== 1 ? 's' : ''}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

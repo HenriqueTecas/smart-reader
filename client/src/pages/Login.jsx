@@ -43,21 +43,21 @@ const Login = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-12 flex items-center">
+    <div className="bg-black min-h-screen py-12 flex items-center">
       <div className="container-custom">
         <div className="max-w-md mx-auto">
-          <div className="card p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
+          <div className="card p-10">
+            <h1 className="text-3xl font-bold text-white mb-2 text-center">
               Welcome Back
             </h1>
-            <p className="text-gray-600 mb-8 text-center">
+            <p className="text-gray-400 mb-10 text-center">
               Sign in to your account
             </p>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Email Address
                 </label>
                 <input
@@ -75,7 +75,7 @@ const Login = () => {
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Password
                 </label>
                 <input
@@ -103,11 +103,11 @@ const Login = () => {
 
             {/* Register Link */}
             <div className="mt-6 text-center">
-              <p className="text-gray-600">
+              <p className="text-gray-400">
                 Don't have an account?{' '}
                 <Link
                   to="/register"
-                  className="text-primary-600 hover:text-primary-700 font-semibold"
+                  className="text-white hover:text-gray-300 font-medium"
                 >
                   Sign up
                 </Link>
@@ -116,14 +116,14 @@ const Login = () => {
           </div>
 
           {/* Demo Credentials */}
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-800 font-semibold mb-2">
+          <div className="mt-4 p-5 bg-dark-secondary rounded-lg border border-gray-800">
+            <p className="text-sm text-white font-medium mb-2">
               Demo Credentials:
             </p>
-            <p className="text-sm text-blue-700">
+            <p className="text-sm text-gray-400">
               Customer: john@example.com / password123
             </p>
-            <p className="text-sm text-blue-700">
+            <p className="text-sm text-gray-400">
               Admin: admin@splitkeyboard.com / admin123
             </p>
           </div>

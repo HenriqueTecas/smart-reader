@@ -74,28 +74,28 @@ const Home = () => {
   ];
 
   return (
-    <div>
+    <div className="bg-black">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-50 to-primary-100 py-20">
+      <section className="bg-black py-24 lg:py-32">
         <div className="container-custom">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              <h1 className="text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
                 Type Smarter,
                 <br />
-                <span className="text-primary-600">Not Harder</span>
+                Not Harder
               </h1>
-              <p className="text-xl text-gray-700 mb-8">
+              <p className="text-xl text-gray-400 mb-10 leading-relaxed">
                 Experience the future of typing with our premium ergonomic split
                 keyboards. Designed for comfort, built for performance.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/products" className="btn-primary inline-flex items-center justify-center">
-                  Shop Now
+                  Shop
                   <FiArrowRight className="ml-2" />
                 </Link>
                 <Link to="/products/ergonomic-split-keyboard-pro" className="btn-secondary inline-flex items-center justify-center">
@@ -104,17 +104,17 @@ const Home = () => {
               </div>
 
               {/* Trust Badges */}
-              <div className="mt-8 flex flex-wrap gap-6 text-sm text-gray-600">
+              <div className="mt-12 flex flex-wrap gap-8 text-sm text-gray-500">
                 <div className="flex items-center">
-                  <FiCheck className="text-green-500 mr-2" />
-                  Free Shipping Over $50
+                  <FiCheck className="text-white mr-2" />
+                  Free Shipping
                 </div>
                 <div className="flex items-center">
-                  <FiCheck className="text-green-500 mr-2" />
-                  30-Day Money Back
+                  <FiCheck className="text-white mr-2" />
+                  30-Day Returns
                 </div>
                 <div className="flex items-center">
-                  <FiCheck className="text-green-500 mr-2" />
+                  <FiCheck className="text-white mr-2" />
                   1-Year Warranty
                 </div>
               </div>
@@ -129,11 +129,11 @@ const Home = () => {
               <img
                 src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800"
                 alt="Ergonomic Split Keyboard"
-                className="rounded-2xl shadow-2xl"
+                className="rounded-lg w-full"
               />
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-lg p-4">
-                <div className="text-3xl font-bold text-primary-600">$69.99</div>
-                <div className="text-sm text-gray-600">Starting at</div>
+              <div className="absolute bottom-8 left-8 bg-white rounded-md p-6">
+                <div className="text-4xl font-bold text-black">$69.99</div>
+                <div className="text-sm text-gray-600 mt-1">Starting at</div>
               </div>
             </motion.div>
           </div>
@@ -141,18 +141,18 @@ const Home = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-dark-secondary border-t border-gray-900">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
               Why Choose Split Keyboards?
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-400">
               Discover the benefits of ergonomic typing
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             {benefits.map((benefit, index) => (
               <motion.div
                 key={index}
@@ -162,11 +162,11 @@ const Home = () => {
                 viewport={{ once: true }}
                 className="text-center"
               >
-                <div className="text-5xl mb-4">{benefit.icon}</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <div className="text-5xl mb-6">{benefit.icon}</div>
+                <h3 className="text-xl font-semibold text-white mb-3">
                   {benefit.title}
                 </h3>
-                <p className="text-gray-600">{benefit.description}</p>
+                <p className="text-gray-400 leading-relaxed">{benefit.description}</p>
               </motion.div>
             ))}
           </div>
@@ -174,13 +174,13 @@ const Home = () => {
       </section>
 
       {/* Featured Products */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-24 bg-black border-t border-gray-900">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
               Featured Products
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-400">
               Our most popular ergonomic keyboards
             </p>
           </div>
@@ -197,7 +197,7 @@ const Home = () => {
             </div>
           )}
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-16">
             <Link to="/products" className="btn-primary inline-flex items-center">
               View All Products
               <FiArrowRight className="ml-2" />
@@ -207,62 +207,62 @@ const Home = () => {
       </section>
 
       {/* Comparison Section */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-dark-secondary border-t border-gray-900">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
               Traditional vs. Split Keyboard
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="card p-8 border-2 border-gray-200">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div className="card p-8 border border-gray-800">
+              <h3 className="text-2xl font-bold text-white mb-6">
                 Traditional Keyboard
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 <li className="flex items-start">
-                  <span className="text-red-500 mr-2">✗</span>
-                  <span className="text-gray-600">Unnatural wrist position</span>
+                  <span className="text-red-500 mr-3 mt-1">✗</span>
+                  <span className="text-gray-400">Unnatural wrist position</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-red-500 mr-2">✗</span>
-                  <span className="text-gray-600">Can cause RSI over time</span>
+                  <span className="text-red-500 mr-3 mt-1">✗</span>
+                  <span className="text-gray-400">Can cause RSI over time</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-red-500 mr-2">✗</span>
-                  <span className="text-gray-600">Fixed layout</span>
+                  <span className="text-red-500 mr-3 mt-1">✗</span>
+                  <span className="text-gray-400">Fixed layout</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-red-500 mr-2">✗</span>
-                  <span className="text-gray-600">Shoulder strain</span>
+                  <span className="text-red-500 mr-3 mt-1">✗</span>
+                  <span className="text-gray-400">Shoulder strain</span>
                 </li>
               </ul>
             </div>
 
-            <div className="card p-8 border-2 border-primary-500 relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+            <div className="card p-8 border-2 border-white relative">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-white text-black px-5 py-1.5 rounded-full text-sm font-semibold">
                 Better Choice
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              <h3 className="text-2xl font-bold text-white mb-6">
                 Split Keyboard
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 <li className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span className="text-gray-600">Natural shoulder width</span>
+                  <span className="text-green-400 mr-3 mt-1">✓</span>
+                  <span className="text-gray-300">Natural shoulder width</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span className="text-gray-600">Reduces wrist strain by 40%</span>
+                  <span className="text-green-400 mr-3 mt-1">✓</span>
+                  <span className="text-gray-300">Reduces wrist strain by 40%</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span className="text-gray-600">Fully customizable</span>
+                  <span className="text-green-400 mr-3 mt-1">✓</span>
+                  <span className="text-gray-300">Fully customizable</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span className="text-gray-600">Improved posture</span>
+                  <span className="text-green-400 mr-3 mt-1">✓</span>
+                  <span className="text-gray-300">Improved posture</span>
                 </li>
               </ul>
             </div>
@@ -271,10 +271,10 @@ const Home = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-24 bg-black border-t border-gray-900">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
               What Our Customers Say
             </h2>
           </div>
@@ -289,17 +289,17 @@ const Home = () => {
                 viewport={{ once: true }}
                 className="card p-8"
               >
-                <div className="flex text-yellow-400 mb-4">
+                <div className="flex text-white mb-6 text-lg">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <span key={i}>★</span>
                   ))}
                 </div>
-                <p className="text-gray-700 mb-6 italic">"{testimonial.content}"</p>
+                <p className="text-gray-300 mb-6 leading-relaxed">"{testimonial.content}"</p>
                 <div>
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-semibold text-white">
                     {testimonial.name}
                   </div>
-                  <div className="text-sm text-gray-600">{testimonial.role}</div>
+                  <div className="text-sm text-gray-500 mt-1">{testimonial.role}</div>
                 </div>
               </motion.div>
             ))}
@@ -308,15 +308,15 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary-600 text-white">
+      <section className="py-24 bg-dark-secondary border-t border-gray-900">
         <div className="container-custom text-center">
-          <h2 className="text-4xl font-bold mb-4">
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6 tracking-tight">
             Ready to Transform Your Typing?
           </h2>
-          <p className="text-xl mb-8 opacity-90">
+          <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
             Join thousands of satisfied customers. 30-day money-back guarantee.
           </p>
-          <Link to="/products" className="btn-accent inline-flex items-center text-lg px-8 py-4">
+          <Link to="/products" className="btn-primary inline-flex items-center text-lg px-10 py-4">
             Shop Now
             <FiArrowRight className="ml-2" />
           </Link>
