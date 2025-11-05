@@ -26,13 +26,13 @@ const Cart = () => {
 
   if (items.length === 0) {
     return (
-      <div className="bg-gray-50 min-h-screen py-20">
+      <div className="bg-black min-h-screen py-20">
         <div className="container-custom text-center">
-          <FiShoppingBag className="w-24 h-24 mx-auto text-gray-400 mb-6" />
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <FiShoppingBag className="w-24 h-24 mx-auto text-gray-700 mb-8" />
+          <h2 className="text-4xl font-bold text-white mb-4">
             Your Cart is Empty
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-400 mb-10">
             Start shopping and add some products to your cart!
           </p>
           <Link to="/products" className="btn-primary inline-flex items-center">
@@ -45,9 +45,9 @@ const Cart = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen py-12">
+    <div className="bg-black min-h-screen py-16">
       <div className="container-custom">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+        <h1 className="text-5xl font-bold text-white mb-12 tracking-tight">Shopping Cart</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
@@ -71,11 +71,11 @@ const Cart = () => {
                   <div className="flex-1">
                     <Link
                       to={`/products/${item.product.slug}`}
-                      className="text-lg font-semibold text-gray-900 hover:text-primary-600 block mb-2"
+                      className="text-lg font-semibold text-white hover:text-gray-300 block mb-2"
                     >
                       {item.product.name}
                     </Link>
-                    <p className="text-gray-600 mb-2">
+                    <p className="text-gray-400 mb-2">
                       ${item.product.price.toFixed(2)} each
                     </p>
 
@@ -89,11 +89,11 @@ const Cart = () => {
                               Math.max(1, item.quantity - 1)
                             )
                           }
-                          className="w-8 h-8 border border-gray-300 rounded hover:bg-gray-100"
+                          className="w-8 h-8 border border-gray-700 rounded text-white hover:bg-gray-900"
                         >
                           -
                         </button>
-                        <span className="w-12 text-center font-semibold">
+                        <span className="w-12 text-center font-semibold text-white">
                           {item.quantity}
                         </span>
                         <button

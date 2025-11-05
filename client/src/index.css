@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-black text-white;
   }
 
   * {
@@ -13,24 +13,25 @@
 }
 
 @layer components {
+  /* Nothing-style buttons - minimal and clean */
   .btn-primary {
-    @apply bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-white text-black px-8 py-3 rounded-md font-medium hover:bg-gray-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-900 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors duration-200;
+    @apply bg-transparent text-white px-8 py-3 rounded-md font-medium border border-white hover:bg-white hover:text-black transition-all duration-200;
   }
 
   .btn-accent {
-    @apply bg-accent-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-accent-600 transition-colors duration-200;
+    @apply bg-gray-800 text-white px-8 py-3 rounded-md font-medium hover:bg-gray-700 transition-all duration-200 border border-gray-700;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply w-full px-4 py-3 bg-dark-secondary border border-gray-800 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-white focus:border-white transition-colors;
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-md overflow-hidden;
+    @apply bg-dark-secondary rounded-lg overflow-hidden border border-gray-900 hover:border-gray-800 transition-colors;
   }
 
   .container-custom {
@@ -38,20 +39,20 @@
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - dark theme */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #0a0a0a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 5px;
+  background: #2a2a2a;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #404040;
 }

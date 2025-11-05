@@ -22,61 +22,61 @@ const ProductCard = ({ product }) => {
   return (
     <Link
       to={`/products/${product.slug}`}
-      className="card hover:shadow-xl transition-shadow duration-300 group"
+      className="card group"
     >
       {/* Image */}
-      <div className="relative overflow-hidden aspect-w-16 aspect-h-9 bg-gray-100">
+      <div className="relative overflow-hidden bg-black">
         <img
           src={product.images[0]?.url || 'https://via.placeholder.com/400x300'}
           alt={product.images[0]?.alt || product.name}
-          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
+          className="w-full h-80 object-cover group-hover:opacity-90 transition-opacity duration-300"
         />
         {discount > 0 && (
-          <div className="absolute top-4 right-4 bg-accent-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+          <div className="absolute top-4 right-4 bg-white text-black px-3 py-1 rounded-md text-xs font-semibold">
             -{discount}%
           </div>
         )}
         {product.stock === 0 && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <span className="text-white text-lg font-semibold">Out of Stock</span>
+          <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+            <span className="text-white text-lg font-medium">Out of Stock</span>
           </div>
         )}
       </div>
 
       {/* Content */}
       <div className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+        <h3 className="text-lg font-medium text-white mb-3 line-clamp-2 group-hover:text-gray-300 transition-colors">
           {product.name}
         </h3>
 
         {/* Rating */}
         {product.rating?.count > 0 && (
-          <div className="flex items-center mb-3">
-            <div className="flex items-center text-yellow-400">
+          <div className="flex items-center mb-4">
+            <div className="flex items-center text-white">
               {[...Array(5)].map((_, i) => (
                 <FiStar
                   key={i}
-                  className={`w-4 h-4 ${
+                  className={`w-3.5 h-3.5 ${
                     i < Math.round(product.rating.average)
                       ? 'fill-current'
-                      : ''
+                      : 'text-gray-600'
                   }`}
                 />
               ))}
             </div>
-            <span className="ml-2 text-sm text-gray-600">
+            <span className="ml-2 text-xs text-gray-500">
               ({product.rating.count})
             </span>
           </div>
         )}
 
         {/* Price */}
-        <div className="flex items-baseline space-x-2 mb-4">
-          <span className="text-2xl font-bold text-gray-900">
+        <div className="flex items-baseline space-x-2 mb-5">
+          <span className="text-2xl font-semibold text-white">
             ${product.price.toFixed(2)}
           </span>
           {product.compareAtPrice && (
-            <span className="text-lg text-gray-500 line-through">
+            <span className="text-sm text-gray-500 line-through">
               ${product.compareAtPrice.toFixed(2)}
             </span>
           )}
@@ -86,10 +86,10 @@ const ProductCard = ({ product }) => {
         {product.stock > 0 && (
           <button
             onClick={handleAddToCart}
-            className="w-full btn-primary flex items-center justify-center space-x-2"
+            className="w-full btn-secondary flex items-center justify-center space-x-2 text-sm"
           >
-            <FiShoppingCart />
-            <span>Add to Cart</span>
+            <FiShoppingCart className="w-4 h-4" />
+            <span>Shop</span>
           </button>
         )}
       </div>
