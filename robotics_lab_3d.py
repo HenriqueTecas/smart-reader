@@ -22,6 +22,20 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
 import sys
+import os
+
+# Set environment variables for better OpenGL compatibility
+os.environ['SDL_VIDEO_X11_FORCE_EGL'] = '0'  # Disable EGL, use GLX instead
+os.environ['PYOPENGL_PLATFORM'] = 'glx'  # Force GLX platform
+
+# Check if display is available
+if 'DISPLAY' not in os.environ:
+    print("ERROR: No display found!")
+    print("Solutions:")
+    print("1. If running over SSH: use 'ssh -X' for X11 forwarding")
+    print("2. If local: ensure you're running in a graphical environment")
+    print("3. For headless: install and use xvfb-run: 'xvfb-run python robotics_lab_3d.py'")
+    sys.exit(1)
 
 # Initialize Pygame
 pygame.init()
@@ -31,9 +45,40 @@ WIDTH = 1600
 HEIGHT = 900
 MINIMAP_SIZE = 400  # Size of minimap in top-right corner
 
-# Create OpenGL context
-screen = pygame.display.set_mode((WIDTH, HEIGHT), DOUBLEBUF | OPENGL)
-pygame.display.set_caption("Lab 1 - 3D Car Simulation with Hood View")
+# Try to create OpenGL context with fallback options
+screen = None
+error_messages = []
+
+# Try different display modes in order of preference
+display_configs = [
+    (DOUBLEBUF | OPENGL, "Double-buffered OpenGL"),
+    (OPENGL, "Single-buffered OpenGL"),
+    (DOUBLEBUF | OPENGL | HWSURFACE, "Hardware-accelerated OpenGL"),
+]
+
+for flags, description in display_configs:
+    try:
+        print(f"Trying {description}...")
+        screen = pygame.display.set_mode((WIDTH, HEIGHT), flags)
+        pygame.display.set_caption("Lab 1 - 3D Car Simulation with Hood View")
+        print(f"✓ Successfully initialized with {description}")
+        break
+    except pygame.error as e:
+        error_messages.append(f"  {description}: {e}")
+        continue
+
+if screen is None:
+    print("\nERROR: Could not initialize OpenGL display!")
+    print("\nTried the following configurations:")
+    for msg in error_messages:
+        print(msg)
+    print("\nPossible solutions:")
+    print("1. Check OpenGL drivers: 'glxinfo | grep OpenGL'")
+    print("2. Install mesa-utils: 'sudo apt-get install mesa-utils'")
+    print("3. Install required GL libraries: 'sudo apt-get install libgl1-mesa-glx libglu1-mesa'")
+    print("4. For virtual display: 'sudo apt-get install xvfb && xvfb-run -s \"-screen 0 1920x1080x24\" python robotics_lab_3d.py'")
+    print("5. Try software rendering: 'export LIBGL_ALWAYS_SOFTWARE=1'")
+    sys.exit(1)
 
 # Colors (for minimap and UI)
 BLACK = (0, 0, 0)

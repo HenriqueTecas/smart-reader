@@ -40,11 +40,44 @@ pip install pygame PyOpenGL PyOpenGL_accelerate numpy
 
 ## Running the Simulation
 
+### Option 1: Direct Run (if you have a display)
 ```bash
 python3 robotics_lab_3d.py
 ```
 
-**Note:** This requires a system with a display and OpenGL support. It will not run in headless/SSH environments.
+### Option 2: Using the Helper Script (handles display setup)
+```bash
+./run_robotics_3d.sh
+```
+This script automatically detects your environment and uses Xvfb if needed.
+
+### Option 3: For Headless/SSH Environments
+```bash
+# Install Xvfb if not already installed
+sudo apt-get install xvfb
+
+# Run with virtual display
+xvfb-run -s "-screen 0 1920x1080x24" python3 robotics_lab_3d.py
+```
+
+## Troubleshooting
+
+If you encounter display or OpenGL errors, see **[TROUBLESHOOTING_3D.md](TROUBLESHOOTING_3D.md)** for detailed solutions.
+
+Common quick fixes:
+```bash
+# For "Could not get EGL display" error
+export SDL_VIDEO_X11_FORCE_EGL=0
+python3 robotics_lab_3d.py
+
+# For hardware acceleration issues
+export LIBGL_ALWAYS_SOFTWARE=1
+python3 robotics_lab_3d.py
+
+# For SSH sessions
+ssh -X user@host
+python3 robotics_lab_3d.py
+```
 
 ## Technical Details
 
