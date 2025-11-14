@@ -153,9 +153,9 @@ class Car:
                 lka_controller.deactivate()
 
             if keys[pygame.K_a]:
-                self.steering_angle -= self.steering_rate * dt  # Turn LEFT
+                self.steering_angle += self.steering_rate * dt  # Turn LEFT (SWAPPED for 3D view)
             elif keys[pygame.K_d]:
-                self.steering_angle += self.steering_rate * dt  # Turn RIGHT
+                self.steering_angle -= self.steering_rate * dt  # Turn RIGHT (SWAPPED for 3D view)
         elif lka_steering is not None:
             self.steering_angle = lka_steering
         else:
@@ -353,8 +353,9 @@ class Car:
         perp_angle = track_angle + np.pi / 2
         lateral_distance = abs(to_car_x * np.cos(perp_angle) + to_car_y * np.sin(perp_angle))
 
-        # Check if within track width (with small margin for car size)
-        max_distance = track.track_width / 2 - self.width / 2
+        # Check if within track width (MORE FORGIVING - added extra margin)
+        # Allow car to go slightly beyond visual track edge before collision
+        max_distance = track.track_width / 2 + self.width  # Extra margin added
         return lateral_distance <= max_distance
 
     def handle_collision(self):
@@ -971,12 +972,12 @@ class SaoPauloTrack:
         glEnd()
 
     def _draw_scenery(self):
-        """Draw trees, signs, and buildings for spatial awareness"""
+        """Draw trees, signs, and buildings for spatial awareness (OPTIMIZED)"""
         glDisable(GL_LIGHTING)
 
-        # Define scenery positions based on track segments
-        tree_interval = 4  # Trees every 4 points
-        sign_positions = [0, 5, 10, 15, 20]  # Important corner signs
+        # REDUCED scenery for performance - only draw every other frame worth
+        tree_interval = 8  # Trees every 8 points (reduced from 4)
+        sign_positions = [0, 10, 20]  # Fewer signs (reduced from 5)
 
         # Draw trees on outer edge of track
         for i in range(0, len(self.centerline), tree_interval):
@@ -1022,7 +1023,7 @@ class SaoPauloTrack:
                 self._draw_distance_sign(sign_x, sign_y, sign_idx * 100)  # Distance markers
 
         # Draw buildings at specific corners for landmarks
-        building_positions = [3, 8, 13, 18]  # Strategic positions
+        building_positions = [8, 18]  # Reduced to 2 buildings for performance
         for building_idx in building_positions:
             if building_idx < len(self.centerline):
                 px, py = self.centerline[building_idx]
@@ -1043,30 +1044,23 @@ class SaoPauloTrack:
         glEnable(GL_LIGHTING)
 
     def _draw_tree(self, x, y):
-        """Draw a simple tree (trunk + foliage)"""
-        # Tree trunk (brown cylinder)
-        glColor3f(0.4, 0.2, 0.1)
-        trunk_height = 15
-        trunk_radius = 2
-
+        """Draw a simple tree (trunk + foliage) - OPTIMIZED"""
         glPushMatrix()
         glTranslatef(x, y, 0)
 
-        # Draw trunk
-        for i in range(10):
-            z = i * trunk_height / 10
-            glBegin(GL_LINES)
-            glVertex3f(0, 0, z)
-            glVertex3f(0, 0, z + trunk_height / 10)
-            glEnd()
+        # Draw trunk (simplified - single line instead of loop)
+        glColor3f(0.4, 0.2, 0.1)
+        trunk_height = 15
+        glBegin(GL_LINES)
+        glVertex3f(0, 0, 0)
+        glVertex3f(0, 0, trunk_height)
+        glEnd()
 
-        # Tree foliage (green cone/sphere)
+        # Tree foliage (green sphere) - reduced detail
         glColor3f(0.1, 0.5, 0.1)
         glTranslatef(0, 0, trunk_height)
-
-        # Draw foliage as sphere
         quadric = gluNewQuadric()
-        gluSphere(quadric, 8, 6, 6)
+        gluSphere(quadric, 8, 4, 4)  # Reduced from 6,6 to 4,4
         gluDeleteQuadric(quadric)
 
         glPopMatrix()
@@ -1616,10 +1610,35 @@ def main():
             overlay_surface.blit(text, rect)
             y += 25
 
-        # Convert pygame surface to OpenGL texture and render
-        texture_data = pygame.image.tostring(overlay_surface, "RGBA", True)
-        glRasterPos2i(0, 0)
-        glDrawPixels(WIDTH, HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, texture_data)
+        # Convert pygame surface to OpenGL texture and render as textured quad
+        # This is more reliable than glDrawPixels
+        texture_data = pygame.image.tostring(overlay_surface, "RGBA", False)
+
+        # Enable blending for transparency
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+        # Create and bind texture
+        texture_id = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, texture_id)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WIDTH, HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data)
+
+        # Draw textured quad covering the entire screen
+        glEnable(GL_TEXTURE_2D)
+        glColor4f(1.0, 1.0, 1.0, 1.0)
+        glBegin(GL_QUADS)
+        glTexCoord2f(0, 0); glVertex2f(0, 0)
+        glTexCoord2f(1, 0); glVertex2f(WIDTH, 0)
+        glTexCoord2f(1, 1); glVertex2f(WIDTH, HEIGHT)
+        glTexCoord2f(0, 1); glVertex2f(0, HEIGHT)
+        glEnd()
+        glDisable(GL_TEXTURE_2D)
+
+        # Clean up texture
+        glDeleteTextures([texture_id])
+        glDisable(GL_BLEND)
 
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_LIGHTING)
