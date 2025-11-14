@@ -43,7 +43,7 @@ pygame.init()
 # Screen settings
 WIDTH = 1600
 HEIGHT = 900
-MINIMAP_SIZE = 400  # Size of minimap in top-right corner
+MINIMAP_SIZE = 500  # Size of minimap in top-right corner (increased for better visibility)
 
 # Try to create OpenGL context with fallback options
 screen = None
@@ -694,15 +694,21 @@ class SaoPauloTrack:
         self._draw_scenery()
 
     def _draw_road_surface(self):
-        """Draw flat road surface"""
-        glColor3f(0.3, 0.3, 0.3)  # Dark gray road
-
-        # Draw road as triangulated strips
+        """Draw flat road surface with subtle texture pattern"""
+        # Draw road as triangulated strips with alternating shades for depth
         outer_points = self._offset_line(self.centerline, self.track_width / 2)
         inner_points = self._offset_line(self.centerline, -self.track_width / 2)
 
         glBegin(GL_TRIANGLE_STRIP)
         for i in range(len(outer_points)):
+            # Alternate between two subtle shades of gray for texture
+            if i % 3 == 0:
+                glColor3f(0.28, 0.28, 0.28)  # Slightly darker
+            elif i % 3 == 1:
+                glColor3f(0.30, 0.30, 0.30)  # Base gray
+            else:
+                glColor3f(0.32, 0.32, 0.32)  # Slightly lighter
+
             ox, oy = outer_points[i]
             ix, iy = inner_points[i]
             glVertex3f(ox, oy, 0)
@@ -775,9 +781,7 @@ class SaoPauloTrack:
                 total_length += seg_length
 
     def _draw_terrain(self):
-        """Draw elevated terrain around track"""
-        glColor3f(0.2, 0.5, 0.2)  # Green terrain
-
+        """Draw elevated terrain around track with textured pattern"""
         # Create terrain boundary (offset further from track)
         terrain_offset = 200
         outer_terrain = self._offset_line(self.centerline, self.track_width / 2 + terrain_offset)
@@ -787,9 +791,15 @@ class SaoPauloTrack:
 
         terrain_height = 30
 
-        # Draw outer terrain wall
+        # Draw outer terrain wall with alternating stripe pattern
         glBegin(GL_TRIANGLE_STRIP)
         for i in range(len(outer_terrain)):
+            # Alternate between two shades of green for stripe pattern
+            if i % 2 == 0:
+                glColor3f(0.2, 0.5, 0.2)  # Darker green
+            else:
+                glColor3f(0.25, 0.55, 0.25)  # Lighter green
+
             tx, ty = outer_terrain[i]
             rx, ry = outer_track[i]
             glVertex3f(rx, ry, 0)
@@ -801,9 +811,15 @@ class SaoPauloTrack:
         glVertex3f(tx, ty, terrain_height)
         glEnd()
 
-        # Draw inner terrain wall
+        # Draw inner terrain wall with alternating stripe pattern
         glBegin(GL_TRIANGLE_STRIP)
         for i in range(len(inner_terrain)):
+            # Alternate between two shades of green for stripe pattern
+            if i % 2 == 0:
+                glColor3f(0.2, 0.5, 0.2)  # Darker green
+            else:
+                glColor3f(0.25, 0.55, 0.25)  # Lighter green
+
             tx, ty = inner_terrain[i]
             rx, ry = inner_track[i]
             glVertex3f(rx, ry, 0)
@@ -815,10 +831,15 @@ class SaoPauloTrack:
         glVertex3f(tx, ty, terrain_height)
         glEnd()
 
-        # Draw terrain top surface (outer)
-        glColor3f(0.15, 0.4, 0.15)
+        # Draw terrain top surface with grid pattern
         glBegin(GL_TRIANGLE_STRIP)
         for i in range(len(outer_terrain)):
+            # Create checkerboard pattern on top surface
+            if (i // 2) % 2 == 0:
+                glColor3f(0.15, 0.4, 0.15)  # Darker grass
+            else:
+                glColor3f(0.18, 0.45, 0.18)  # Lighter grass
+
             tx, ty = outer_terrain[i]
             glVertex3f(tx, ty, terrain_height)
             glVertex3f(tx, ty, terrain_height + 10)
@@ -1335,7 +1356,12 @@ class Minimap:
 
     def render(self, car, camera, lka):
         """Render minimap with original 2D view"""
-        self.surface.fill(BLACK)
+        # Fill with semi-transparent dark background
+        self.surface.fill((20, 20, 20))  # Very dark gray background
+
+        # Draw border around minimap
+        pygame.draw.rect(self.surface, (100, 100, 100), (0, 0, self.size, self.size), 3)
+        pygame.draw.rect(self.surface, (200, 200, 200), (2, 2, self.size-4, self.size-4), 1)
 
         # Draw track
         self._draw_track_2d()
