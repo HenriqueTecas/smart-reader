@@ -11,7 +11,9 @@ This is a 3D OpenGL conversion of the robotics lab simulation that preserves all
 - **✅ Performance Optimized** - Fixed freezing issues (reduced scenery by 50%, simplified rendering)
 - **✅ Fixed Steering Controls** - A/D keys now work correctly for 3D hood camera view
 - **✅ Fixed Collision Detection** - More forgiving boundaries, no more unexpected wall hits
-- **✅ Fixed Minimap** - Now displays correctly in top-right corner with all elements visible
+- **🔧 Minimap Scaling (IN PROGRESS)** - Working on showing entire track scaled to fit (debug mode active)
+- **✅ 3D Grass Texture** - Added alternating stripe and checkerboard patterns to terrain for depth perception
+- **✅ Road Texture** - Subtle 3-tone gray pattern on road surface for better visual feedback
 - **✅ Visual Track Features** - Checkpoints, sector markers, direction arrows, and start/finish line
 - **✅ Optimized Scenery** - Trees, distance signs, and buildings for spatial awareness:
   - 🌲 **Trees**: Green foliage on brown trunks (optimized - every 8 points)
@@ -26,9 +28,10 @@ This is a 3D OpenGL conversion of the robotics lab simulation that preserves all
 - **Track markers** - Checkpoint poles, sector numbers, and direction arrows
 
 ### Minimap (Top-Right Corner)
-- **Full 2D simulation view** - The original 2D visualization as a minimap
+- **Full 2D simulation view** - 500x500px minimap showing the ENTIRE track scaled to fit
 - Shows track layout, car position, camera FOV, detected lanes, and LKA lookahead point
-- All original visualization elements preserved
+- **Enhanced visibility** - Dark background, double border, and increased size
+- **DEBUG MODE ACTIVE**: Currently showing grid lines, red bounds rectangle, scale factor, and coordinate labels to verify scaling is working correctly
 
 ### Preserved Logic
 - ✅ **Ackermann steering kinematics** - Exact same physics model
