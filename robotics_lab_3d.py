@@ -1363,13 +1363,24 @@ class Minimap:
         pygame.draw.rect(self.surface, (100, 100, 100), (0, 0, self.size, self.size), 3)
         pygame.draw.rect(self.surface, (200, 200, 200), (2, 2, self.size-4, self.size-4), 1)
 
-        # DEBUG: Draw expected bounds rectangle
+        # DEBUG: Draw grid to show we're using full minimap space
+        grid_color = (40, 40, 40)
+        for i in range(0, self.size, 50):
+            pygame.draw.line(self.surface, grid_color, (i, 0), (i, self.size), 1)
+            pygame.draw.line(self.surface, grid_color, (0, i), (self.size, i), 1)
+
+        # DEBUG: Draw expected bounds rectangle (should be near edges)
         min_scaled = self._world_to_minimap(self.min_x, self.min_y)
         max_scaled = self._world_to_minimap(self.max_x, self.max_y)
         pygame.draw.rect(self.surface, (255, 0, 0),
                         (min_scaled[0], min_scaled[1],
                          max_scaled[0] - min_scaled[0],
-                         max_scaled[1] - min_scaled[1]), 1)
+                         max_scaled[1] - min_scaled[1]), 2)
+
+        # DEBUG: Label the bounds
+        font = pygame.font.Font(None, 16)
+        bounds_text = font.render(f"Bounds: {min_scaled} to {max_scaled}", True, (255, 0, 0))
+        self.surface.blit(bounds_text, (5, self.size - 20))
 
         # Draw track
         self._draw_track_2d()
@@ -1403,6 +1414,11 @@ class Minimap:
         # Convert to minimap coordinates
         outer_scaled = [self._world_to_minimap(x, y) for x, y in outer]
         inner_scaled = [self._world_to_minimap(x, y) for x, y in inner]
+
+        # DEBUG: Print first and last points to verify scaling
+        if len(outer) > 0:
+            print(f"Track outer[0]: world={outer[0]}, minimap={outer_scaled[0]}")
+            print(f"Track outer[-1]: world={outer[-1]}, minimap={outer_scaled[-1]}")
 
         if len(outer_scaled) > 2:
             pygame.draw.lines(self.surface, WHITE, True, outer_scaled, 2)
