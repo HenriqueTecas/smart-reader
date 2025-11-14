@@ -1347,6 +1347,15 @@ class Minimap:
         self.scale = min(scale_x, scale_y)
         self.margin = margin
 
+        print("="*60)
+        print("MINIMAP INITIALIZATION")
+        print(f"Minimap size: {self.size}x{self.size}")
+        print(f"Track bounds: X=[{self.min_x:.1f}, {self.max_x:.1f}] Y=[{self.min_y:.1f}, {self.max_y:.1f}]")
+        print(f"Track dimensions: {track_width:.1f} x {track_height:.1f}")
+        print(f"Scale: {self.scale:.4f} (scale_x={scale_x:.4f}, scale_y={scale_y:.4f})")
+        print(f"Expected minimap bounds: ({self.margin}, {self.margin}) to ({int(track_width*self.scale + self.margin)}, {int(track_height*self.scale + self.margin)})")
+        print("="*60)
+
     def _world_to_minimap(self, x, y):
         """Convert world coordinates to minimap coordinates"""
         # Translate to origin, scale, then translate to minimap with margin
@@ -1414,11 +1423,6 @@ class Minimap:
         # Convert to minimap coordinates
         outer_scaled = [self._world_to_minimap(x, y) for x, y in outer]
         inner_scaled = [self._world_to_minimap(x, y) for x, y in inner]
-
-        # DEBUG: Print first and last points to verify scaling
-        if len(outer) > 0:
-            print(f"Track outer[0]: world={outer[0]}, minimap={outer_scaled[0]}")
-            print(f"Track outer[-1]: world={outer[-1]}, minimap={outer_scaled[-1]}")
 
         if len(outer_scaled) > 2:
             pygame.draw.lines(self.surface, WHITE, True, outer_scaled, 2)
