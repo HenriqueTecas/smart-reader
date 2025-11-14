@@ -153,9 +153,9 @@ class Car:
                 lka_controller.deactivate()
 
             if keys[pygame.K_a]:
-                self.steering_angle -= self.steering_rate * dt
+                self.steering_angle += self.steering_rate * dt  # Turn LEFT (FIXED)
             elif keys[pygame.K_d]:
-                self.steering_angle += self.steering_rate * dt
+                self.steering_angle -= self.steering_rate * dt  # Turn RIGHT (FIXED)
         elif lka_steering is not None:
             self.steering_angle = lka_steering
         else:
@@ -170,10 +170,19 @@ class Car:
         # Ackermann steering kinematics
         if abs(self.velocity) > 0.1:
             omega = self.velocity * np.tan(self.steering_angle) / self.wheelbase
+
+            # Store previous position for collision handling
+            prev_x, prev_y = self.x, self.y
+
+            # Update position and orientation
             self.x += self.velocity * np.cos(self.theta) * dt
             self.y += self.velocity * np.sin(self.theta) * dt
             self.theta += omega * dt
             self.theta = np.arctan2(np.sin(self.theta), np.cos(self.theta))
+
+            # Check for collision and revert if off-track (handled in main loop)
+            self.prev_x = prev_x
+            self.prev_y = prev_y
 
     def get_front_axle_position(self):
         """Return front axle center position"""
@@ -316,6 +325,44 @@ class Car:
             glVertex3f(x, y, -height/2)
             glVertex3f(x, y, height/2)
         glEnd()
+
+    def is_on_track(self, track):
+        """Check if car is within track boundaries"""
+        # Find closest point on centerline
+        min_dist = float('inf')
+        closest_idx = 0
+
+        for i, (cx, cy) in enumerate(track.centerline):
+            dist = np.sqrt((self.x - cx)**2 + (self.y - cy)**2)
+            if dist < min_dist:
+                min_dist = dist
+                closest_idx = i
+
+        # Get track direction at closest point
+        p_curr = track.centerline[closest_idx]
+        p_next = track.centerline[(closest_idx + 1) % len(track.centerline)]
+
+        dx = p_next[0] - p_curr[0]
+        dy = p_next[1] - p_curr[1]
+        track_angle = np.arctan2(dy, dx)
+
+        # Calculate perpendicular distance from track center
+        to_car_x = self.x - p_curr[0]
+        to_car_y = self.y - p_curr[1]
+
+        perp_angle = track_angle + np.pi / 2
+        lateral_distance = abs(to_car_x * np.cos(perp_angle) + to_car_y * np.sin(perp_angle))
+
+        # Check if within track width (with small margin for car size)
+        max_distance = track.track_width / 2 - self.width / 2
+        return lateral_distance <= max_distance
+
+    def handle_collision(self):
+        """Handle collision by reverting to previous position and stopping"""
+        if hasattr(self, 'prev_x') and hasattr(self, 'prev_y'):
+            self.x = self.prev_x
+            self.y = self.prev_y
+            self.velocity = 0  # Stop the car
 
 
 class CameraSensor:
@@ -639,6 +686,9 @@ class SaoPauloTrack:
         # Draw surrounding terrain
         self._draw_terrain()
 
+        # Draw visual features (checkpoints, arrows, sectors)
+        self._draw_track_features()
+
     def _draw_road_surface(self):
         """Draw flat road surface"""
         glColor3f(0.3, 0.3, 0.3)  # Dark gray road
@@ -771,6 +821,150 @@ class SaoPauloTrack:
         tx, ty = outer_terrain[0]
         glVertex3f(tx, ty, terrain_height)
         glVertex3f(tx, ty, terrain_height + 10)
+        glEnd()
+
+    def _draw_track_features(self):
+        """Draw visual features like checkpoints, sectors, and direction arrows"""
+        glDisable(GL_LIGHTING)
+
+        # Define checkpoint/sector positions (every N points along the track)
+        checkpoint_interval = 6  # Every 6 points
+        arrow_interval = 3  # More frequent arrows for direction indication
+
+        for i in range(0, len(self.centerline), checkpoint_interval):
+            px, py = self.centerline[i]
+            next_idx = (i + 1) % len(self.centerline)
+            next_px, next_py = self.centerline[next_idx]
+
+            # Calculate track direction
+            dx = next_px - px
+            dy = next_py - py
+            track_angle = np.arctan2(dy, dx)
+            perp_angle = track_angle + np.pi / 2
+
+            # Draw checkpoint markers (tall colored poles at track sides)
+            marker_height = 25
+            marker_offset = self.track_width / 2 + 5
+
+            # Left marker (cyan)
+            left_x = px + marker_offset * np.cos(perp_angle)
+            left_y = py + marker_offset * np.sin(perp_angle)
+            self._draw_checkpoint_marker(left_x, left_y, marker_height, (0.0, 0.8, 1.0))
+
+            # Right marker (cyan)
+            right_x = px - marker_offset * np.cos(perp_angle)
+            right_y = py - marker_offset * np.sin(perp_angle)
+            self._draw_checkpoint_marker(right_x, right_y, marker_height, (0.0, 0.8, 1.0))
+
+            # Draw sector number in the air
+            sector_num = i // checkpoint_interval + 1
+            mid_x = px
+            mid_y = py
+            self._draw_sector_number(mid_x, mid_y, 20, sector_num)
+
+        # Draw direction arrows on track surface
+        for i in range(0, len(self.centerline), arrow_interval):
+            px, py = self.centerline[i]
+            next_idx = (i + 1) % len(self.centerline)
+            next_px, next_py = self.centerline[next_idx]
+
+            # Calculate track direction
+            dx = next_px - px
+            dy = next_py - py
+            length = np.sqrt(dx**2 + dy**2)
+            if length > 0:
+                dx /= length
+                dy /= length
+
+                # Draw arrow
+                self._draw_direction_arrow(px, py, dx, dy)
+
+        # Draw start/finish line markers (special color)
+        px, py = self.centerline[0]
+        next_px, next_py = self.centerline[1]
+        dx = next_px - px
+        dy = next_py - py
+        track_angle = np.arctan2(dy, dx)
+        perp_angle = track_angle + np.pi / 2
+
+        marker_offset = self.track_width / 2 + 5
+        marker_height = 35  # Taller for start/finish
+
+        # Start/finish markers (red and white pattern)
+        left_x = px + marker_offset * np.cos(perp_angle)
+        left_y = py + marker_offset * np.sin(perp_angle)
+        self._draw_checkpoint_marker(left_x, left_y, marker_height, (1.0, 0.0, 0.0))
+
+        right_x = px - marker_offset * np.cos(perp_angle)
+        right_y = py - marker_offset * np.sin(perp_angle)
+        self._draw_checkpoint_marker(right_x, right_y, marker_height, (1.0, 1.0, 1.0))
+
+        glEnable(GL_LIGHTING)
+
+    def _draw_checkpoint_marker(self, x, y, height, color):
+        """Draw a checkpoint marker pole"""
+        glColor3f(*color)
+
+        # Draw vertical pole
+        glLineWidth(4)
+        glBegin(GL_LINES)
+        glVertex3f(x, y, 0)
+        glVertex3f(x, y, height)
+        glEnd()
+
+        # Draw sphere at top
+        glPushMatrix()
+        glTranslatef(x, y, height)
+        quadric = gluNewQuadric()
+        gluSphere(quadric, 3, 8, 8)
+        gluDeleteQuadric(quadric)
+        glPopMatrix()
+
+    def _draw_sector_number(self, x, y, height, number):
+        """Draw floating sector number (simplified as a marker)"""
+        # Draw as colored floating sphere
+        color = ((number * 0.3) % 1.0, (number * 0.5) % 1.0, (number * 0.7) % 1.0)
+        glColor3f(*color)
+
+        glPushMatrix()
+        glTranslatef(x, y, height)
+        quadric = gluNewQuadric()
+        gluSphere(quadric, 5, 8, 8)
+        gluDeleteQuadric(quadric)
+        glPopMatrix()
+
+    def _draw_direction_arrow(self, x, y, dx, dy):
+        """Draw a direction arrow on the track surface"""
+        glColor3f(1.0, 1.0, 0.0)  # Yellow arrows
+        glLineWidth(3)
+
+        arrow_length = 15
+        arrow_width = 8
+
+        # Arrow shaft
+        end_x = x + dx * arrow_length
+        end_y = y + dy * arrow_length
+
+        glBegin(GL_LINES)
+        glVertex3f(x, y, 0.2)
+        glVertex3f(end_x, end_y, 0.2)
+        glEnd()
+
+        # Arrowhead (two lines forming V)
+        head_angle = np.arctan2(dy, dx)
+        left_angle = head_angle + 2.5
+        right_angle = head_angle - 2.5
+
+        left_x = end_x - arrow_width * np.cos(left_angle)
+        left_y = end_y - arrow_width * np.sin(left_angle)
+        right_x = end_x - arrow_width * np.cos(right_angle)
+        right_y = end_y - arrow_width * np.sin(right_angle)
+
+        glBegin(GL_LINES)
+        glVertex3f(end_x, end_y, 0.2)
+        glVertex3f(left_x, left_y, 0.2)
+        glVertex3f(end_x, end_y, 0.2)
+        glVertex3f(right_x, right_y, 0.2)
         glEnd()
 
 
@@ -950,17 +1144,44 @@ class Minimap:
         pygame.draw.polygon(s, (0, 255, 0, 30), fov_points)
         self.surface.blit(s, (0, 0))
 
+        # Draw FOV edges
+        pygame.draw.line(self.surface, GREEN, (int(camera_x), int(camera_y)),
+                        (int(fov_points[1][0]), int(fov_points[1][1])), 1)
+        pygame.draw.line(self.surface, GREEN, (int(camera_x), int(camera_y)),
+                        (int(fov_points[2][0]), int(fov_points[2][1])), 1)
+
         # Draw detected lane points
         left_lane, right_lane, center_lane = camera.detect_lanes(camera.car.track)
 
+        # Get wheel positions
+        (left_wheel_x, left_wheel_y), (right_wheel_x, right_wheel_y) = camera.car.get_front_wheel_positions()
+
+        # Draw left lane points with vectors from LEFT wheel
         for px, py, _ in left_lane:
-            pygame.draw.circle(self.surface, RED, (int(px), int(py)), 2)
+            pygame.draw.circle(self.surface, (255, 0, 0), (int(px), int(py)), 3)
+            # Vector from left wheel to left lane point
+            pygame.draw.line(self.surface, (255, 128, 0),
+                           (int(left_wheel_x), int(left_wheel_y)),
+                           (int(px), int(py)), 1)
 
+        # Draw right lane points with vectors from RIGHT wheel
         for px, py, _ in right_lane:
-            pygame.draw.circle(self.surface, BLUE, (int(px), int(py)), 2)
+            pygame.draw.circle(self.surface, (0, 128, 255), (int(px), int(py)), 3)
+            # Vector from right wheel to right lane point
+            pygame.draw.line(self.surface, (0, 200, 200),
+                           (int(right_wheel_x), int(right_wheel_y)),
+                           (int(px), int(py)), 1)
 
+        # Draw center lane points
         for px, py, _ in center_lane:
-            pygame.draw.circle(self.surface, YELLOW, (int(px), int(py)), 1)
+            pygame.draw.circle(self.surface, (0, 0, 200), (int(px), int(py)), 2)
+
+        # Draw camera position
+        pygame.draw.circle(self.surface, GREEN, (int(camera_x), int(camera_y)), 5)
+
+        # Draw wheel positions
+        pygame.draw.circle(self.surface, (255, 100, 0), (int(left_wheel_x), int(left_wheel_y)), 5)  # Orange
+        pygame.draw.circle(self.surface, (0, 150, 255), (int(right_wheel_x), int(right_wheel_y)), 5)  # Cyan
 
     def _draw_car_2d(self, car):
         """Draw car in minimap"""
@@ -1109,6 +1330,10 @@ def main():
 
         # Update car
         car.update(dt, keys, lka_steering, lka)
+
+        # Check collision with track boundaries
+        if not car.is_on_track(track):
+            car.handle_collision()
 
         # === 3D RENDERING ===
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
