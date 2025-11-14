@@ -8,11 +8,14 @@ This is a 3D OpenGL conversion of the robotics lab simulation that preserves all
 
 ### Latest Enhancements ✨
 
-- **✅ Fixed Steering Controls** - A/D keys now correctly turn left/right respectively
-- **✅ Collision Detection** - Invisible walls prevent car from going off-track
-- **✅ Enhanced Minimap** - Exact match of 2D implementation with wheel positions and lane vectors
+- **✅ Fixed Steering Controls** - A/D keys now match original 2D code behavior (tested and verified)
+- **✅ Collision Detection** - Invisible walls prevent car from going off-track (working!)
+- **✅ Enhanced Minimap** - Top-right corner shows full 2D view with all detection elements
 - **✅ Visual Track Features** - Checkpoints, sector markers, direction arrows, and start/finish line
-- **✅ Spatial Awareness** - Easy to see where you are and which direction to drive
+- **✅ Realistic Scenery** - Trees, distance signs, and buildings for spatial awareness:
+  - 🌲 **Trees**: Green foliage on brown trunks, alternating sides of track
+  - 🚏 **Distance Signs**: Orange markers at key corners (0m, 500m, 1000m, etc.)
+  - 🏢 **Buildings**: 4 different colored buildings as landmarks at strategic positions
 
 ### 3D Rendering
 - **First-person hood camera view** - Experience the simulation from the driver's perspective
@@ -117,11 +120,18 @@ python3 robotics_lab_3d.py
   - Cyan spheres for right lane boundary detections
   - Yellow spheres for center dotted line detections
   - Large yellow sphere for LKA lookahead point
-- **Track Features** (NEW):
+- **Track Features**:
   - **Checkpoint Markers**: Cyan poles with spheres at track sides (every 6 points)
   - **Sector Numbers**: Colored floating spheres above track indicating sector/segment
   - **Direction Arrows**: Yellow arrows on track surface showing driving direction
   - **Start/Finish Line**: Red and white tall poles marking the start/finish
+- **Scenery Elements** (NEW):
+  - **Trees**: Green spherical foliage on brown trunks, placed every 4 points alternating sides
+  - **Distance Signs**: Orange posts with colored spheres at positions 0, 500m, 1000m, 1500m, 2000m
+  - **Buildings**: 4 landmark buildings with different colors (gray, brown, blue-gray, red-gray)
+    - Varying heights (25-40 units) for easy identification
+    - Windows for realism
+    - Positioned at strategic corners (3, 8, 13, 18)
 - **Collision Detection**: Invisible walls at track boundaries prevent off-track driving
 
 #### Minimap (400x400px) - Exact Match of 2D Implementation
