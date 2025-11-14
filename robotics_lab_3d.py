@@ -1292,6 +1292,47 @@ class Minimap:
         self.track = track
         self.surface = pygame.Surface((size, size))
 
+        # Calculate track bounding box for proper scaling
+        self._calculate_track_bounds()
+
+    def _calculate_track_bounds(self):
+        """Calculate bounding box of entire track"""
+        # Get all track points including boundaries
+        all_points = list(self.track.centerline)
+        outer = self.track._offset_line(self.track.centerline, self.track.track_width / 2)
+        inner = self.track._offset_line(self.track.centerline, -self.track.track_width / 2)
+        all_points.extend(outer)
+        all_points.extend(inner)
+
+        # Find min/max coordinates
+        xs = [p[0] for p in all_points]
+        ys = [p[1] for p in all_points]
+
+        self.min_x = min(xs)
+        self.max_x = max(xs)
+        self.min_y = min(ys)
+        self.max_y = max(ys)
+
+        # Calculate scale to fit in minimap with margin
+        margin = 20  # pixels
+        track_width = self.max_x - self.min_x
+        track_height = self.max_y - self.min_y
+
+        # Scale to fit within minimap size minus margins
+        scale_x = (self.size - 2 * margin) / track_width
+        scale_y = (self.size - 2 * margin) / track_height
+
+        # Use the smaller scale to maintain aspect ratio
+        self.scale = min(scale_x, scale_y)
+        self.margin = margin
+
+    def _world_to_minimap(self, x, y):
+        """Convert world coordinates to minimap coordinates"""
+        # Translate to origin, scale, then translate to minimap with margin
+        map_x = (x - self.min_x) * self.scale + self.margin
+        map_y = (y - self.min_y) * self.scale + self.margin
+        return int(map_x), int(map_y)
+
     def render(self, car, camera, lka):
         """Render minimap with original 2D view"""
         self.surface.fill(BLACK)
@@ -1305,10 +1346,10 @@ class Minimap:
         # Draw LKA lookahead
         if lka.active and hasattr(lka, 'lookahead_point'):
             lx, ly = lka.lookahead_point
-            pygame.draw.line(self.surface, YELLOW,
-                           (int(car.x), int(car.y)),
-                           (int(lx), int(ly)), 2)
-            pygame.draw.circle(self.surface, YELLOW, (int(lx), int(ly)), 6)
+            car_scaled = self._world_to_minimap(car.x, car.y)
+            lookahead_scaled = self._world_to_minimap(lx, ly)
+            pygame.draw.line(self.surface, YELLOW, car_scaled, lookahead_scaled, 2)
+            pygame.draw.circle(self.surface, YELLOW, lookahead_scaled, 6)
 
         # Draw car (simple representation)
         self._draw_car_2d(car)
@@ -1316,19 +1357,24 @@ class Minimap:
         return self.surface
 
     def _draw_track_2d(self):
-        """Draw track in minimap"""
+        """Draw track in minimap with proper scaling"""
         outer = self.track._offset_line(self.track.centerline, self.track.track_width / 2)
         inner = self.track._offset_line(self.track.centerline, -self.track.track_width / 2)
 
-        if len(outer) > 2:
-            pygame.draw.lines(self.surface, WHITE, True, outer, 2)
-        if len(inner) > 2:
-            pygame.draw.lines(self.surface, WHITE, True, inner, 2)
+        # Convert to minimap coordinates
+        outer_scaled = [self._world_to_minimap(x, y) for x, y in outer]
+        inner_scaled = [self._world_to_minimap(x, y) for x, y in inner]
+
+        if len(outer_scaled) > 2:
+            pygame.draw.lines(self.surface, WHITE, True, outer_scaled, 2)
+        if len(inner_scaled) > 2:
+            pygame.draw.lines(self.surface, WHITE, True, inner_scaled, 2)
 
         # Draw centerline dashed
-        for i in range(0, len(self.track.centerline) - 1, 2):
-            p1 = self.track.centerline[i]
-            p2 = self.track.centerline[i + 1]
+        centerline_scaled = [self._world_to_minimap(x, y) for x, y in self.track.centerline]
+        for i in range(0, len(centerline_scaled) - 1, 2):
+            p1 = centerline_scaled[i]
+            p2 = centerline_scaled[i + 1]
             pygame.draw.line(self.surface, GRAY, p1, p2, 1)
 
     def _draw_camera_view_2d(self, camera):
@@ -1348,49 +1394,52 @@ class Minimap:
             camera_y + camera.max_range * np.sin(right_angle)
         ))
 
+        # Convert FOV points to minimap coordinates
+        fov_points_scaled = [self._world_to_minimap(x, y) for x, y in fov_points]
+
         # Draw semi-transparent FOV
         s = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
-        pygame.draw.polygon(s, (0, 255, 0, 30), fov_points)
+        pygame.draw.polygon(s, (0, 255, 0, 30), fov_points_scaled)
         self.surface.blit(s, (0, 0))
 
         # Draw FOV edges
-        pygame.draw.line(self.surface, GREEN, (int(camera_x), int(camera_y)),
-                        (int(fov_points[1][0]), int(fov_points[1][1])), 1)
-        pygame.draw.line(self.surface, GREEN, (int(camera_x), int(camera_y)),
-                        (int(fov_points[2][0]), int(fov_points[2][1])), 1)
+        camera_pos_scaled = fov_points_scaled[0]
+        pygame.draw.line(self.surface, GREEN, camera_pos_scaled, fov_points_scaled[1], 1)
+        pygame.draw.line(self.surface, GREEN, camera_pos_scaled, fov_points_scaled[2], 1)
 
         # Draw detected lane points
         left_lane, right_lane, center_lane = camera.detect_lanes(camera.car.track)
 
         # Get wheel positions
         (left_wheel_x, left_wheel_y), (right_wheel_x, right_wheel_y) = camera.car.get_front_wheel_positions()
+        left_wheel_scaled = self._world_to_minimap(left_wheel_x, left_wheel_y)
+        right_wheel_scaled = self._world_to_minimap(right_wheel_x, right_wheel_y)
 
         # Draw left lane points with vectors from LEFT wheel
         for px, py, _ in left_lane:
-            pygame.draw.circle(self.surface, (255, 0, 0), (int(px), int(py)), 3)
+            px_scaled, py_scaled = self._world_to_minimap(px, py)
+            pygame.draw.circle(self.surface, (255, 0, 0), (px_scaled, py_scaled), 3)
             # Vector from left wheel to left lane point
-            pygame.draw.line(self.surface, (255, 128, 0),
-                           (int(left_wheel_x), int(left_wheel_y)),
-                           (int(px), int(py)), 1)
+            pygame.draw.line(self.surface, (255, 128, 0), left_wheel_scaled, (px_scaled, py_scaled), 1)
 
         # Draw right lane points with vectors from RIGHT wheel
         for px, py, _ in right_lane:
-            pygame.draw.circle(self.surface, (0, 128, 255), (int(px), int(py)), 3)
+            px_scaled, py_scaled = self._world_to_minimap(px, py)
+            pygame.draw.circle(self.surface, (0, 128, 255), (px_scaled, py_scaled), 3)
             # Vector from right wheel to right lane point
-            pygame.draw.line(self.surface, (0, 200, 200),
-                           (int(right_wheel_x), int(right_wheel_y)),
-                           (int(px), int(py)), 1)
+            pygame.draw.line(self.surface, (0, 200, 200), right_wheel_scaled, (px_scaled, py_scaled), 1)
 
         # Draw center lane points
         for px, py, _ in center_lane:
-            pygame.draw.circle(self.surface, (0, 0, 200), (int(px), int(py)), 2)
+            px_scaled, py_scaled = self._world_to_minimap(px, py)
+            pygame.draw.circle(self.surface, (0, 0, 200), (px_scaled, py_scaled), 2)
 
         # Draw camera position
-        pygame.draw.circle(self.surface, GREEN, (int(camera_x), int(camera_y)), 5)
+        pygame.draw.circle(self.surface, GREEN, camera_pos_scaled, 5)
 
         # Draw wheel positions
-        pygame.draw.circle(self.surface, (255, 100, 0), (int(left_wheel_x), int(left_wheel_y)), 5)  # Orange
-        pygame.draw.circle(self.surface, (0, 150, 255), (int(right_wheel_x), int(right_wheel_y)), 5)  # Cyan
+        pygame.draw.circle(self.surface, (255, 100, 0), left_wheel_scaled, 5)  # Orange
+        pygame.draw.circle(self.surface, (0, 150, 255), right_wheel_scaled, 5)  # Cyan
 
     def _draw_car_2d(self, car):
         """Draw car in minimap"""
@@ -1400,13 +1449,16 @@ class Minimap:
         front_x = car.x + (car.length/2) * np.cos(car.theta)
         front_y = car.y + (car.length/2) * np.sin(car.theta)
 
-        pygame.draw.line(self.surface, WHITE,
-                        (int(rear_x), int(rear_y)),
-                        (int(front_x), int(front_y)), 2)
+        # Convert to minimap coordinates
+        rear_scaled = self._world_to_minimap(rear_x, rear_y)
+        front_scaled = self._world_to_minimap(front_x, front_y)
+        center_scaled = self._world_to_minimap(car.x, car.y)
+
+        pygame.draw.line(self.surface, WHITE, rear_scaled, front_scaled, 2)
 
         # Draw direction indicator
-        pygame.draw.circle(self.surface, BLUE, (int(front_x), int(front_y)), 4)
-        pygame.draw.circle(self.surface, YELLOW, (int(car.x), int(car.y)), 3)
+        pygame.draw.circle(self.surface, BLUE, front_scaled, 4)
+        pygame.draw.circle(self.surface, YELLOW, center_scaled, 3)
 
 
 class HUD:
