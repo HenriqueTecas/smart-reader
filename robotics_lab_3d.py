@@ -153,9 +153,9 @@ class Car:
                 lka_controller.deactivate()
 
             if keys[pygame.K_a]:
-                self.steering_angle += self.steering_rate * dt  # Turn LEFT (FIXED)
+                self.steering_angle -= self.steering_rate * dt  # Turn LEFT
             elif keys[pygame.K_d]:
-                self.steering_angle -= self.steering_rate * dt  # Turn RIGHT (FIXED)
+                self.steering_angle += self.steering_rate * dt  # Turn RIGHT
         elif lka_steering is not None:
             self.steering_angle = lka_steering
         else:
@@ -689,6 +689,9 @@ class SaoPauloTrack:
         # Draw visual features (checkpoints, arrows, sectors)
         self._draw_track_features()
 
+        # Draw scenery elements (trees, signs, buildings)
+        self._draw_scenery()
+
     def _draw_road_surface(self):
         """Draw flat road surface"""
         glColor3f(0.3, 0.3, 0.3)  # Dark gray road
@@ -966,6 +969,218 @@ class SaoPauloTrack:
         glVertex3f(end_x, end_y, 0.2)
         glVertex3f(right_x, right_y, 0.2)
         glEnd()
+
+    def _draw_scenery(self):
+        """Draw trees, signs, and buildings for spatial awareness"""
+        glDisable(GL_LIGHTING)
+
+        # Define scenery positions based on track segments
+        tree_interval = 4  # Trees every 4 points
+        sign_positions = [0, 5, 10, 15, 20]  # Important corner signs
+
+        # Draw trees on outer edge of track
+        for i in range(0, len(self.centerline), tree_interval):
+            px, py = self.centerline[i]
+            next_idx = (i + 1) % len(self.centerline)
+            next_px, next_py = self.centerline[next_idx]
+
+            # Calculate track direction
+            dx = next_px - px
+            dy = next_py - py
+            track_angle = np.arctan2(dy, dx)
+            perp_angle = track_angle + np.pi / 2
+
+            # Alternate trees on left and right
+            side_offset = self.track_width / 2 + 30
+            if i % 2 == 0:
+                # Tree on left
+                tree_x = px + side_offset * np.cos(perp_angle)
+                tree_y = py + side_offset * np.sin(perp_angle)
+                self._draw_tree(tree_x, tree_y)
+            else:
+                # Tree on right
+                tree_x = px - side_offset * np.cos(perp_angle)
+                tree_y = py - side_offset * np.sin(perp_angle)
+                self._draw_tree(tree_x, tree_y)
+
+        # Draw distance signs at key corners
+        for sign_idx in sign_positions:
+            if sign_idx < len(self.centerline):
+                px, py = self.centerline[sign_idx]
+                next_idx = (sign_idx + 1) % len(self.centerline)
+                next_px, next_py = self.centerline[next_idx]
+
+                dx = next_px - px
+                dy = next_py - py
+                track_angle = np.arctan2(dy, dx)
+                perp_angle = track_angle + np.pi / 2
+
+                # Sign on right side
+                sign_offset = self.track_width / 2 + 15
+                sign_x = px - sign_offset * np.cos(perp_angle)
+                sign_y = py - sign_offset * np.sin(perp_angle)
+                self._draw_distance_sign(sign_x, sign_y, sign_idx * 100)  # Distance markers
+
+        # Draw buildings at specific corners for landmarks
+        building_positions = [3, 8, 13, 18]  # Strategic positions
+        for building_idx in building_positions:
+            if building_idx < len(self.centerline):
+                px, py = self.centerline[building_idx]
+                next_idx = (building_idx + 1) % len(self.centerline)
+                next_px, next_py = self.centerline[next_idx]
+
+                dx = next_px - px
+                dy = next_py - py
+                track_angle = np.arctan2(dy, dx)
+                perp_angle = track_angle + np.pi / 2
+
+                # Building on outer edge
+                building_offset = self.track_width / 2 + 60
+                building_x = px + building_offset * np.cos(perp_angle)
+                building_y = py + building_offset * np.sin(perp_angle)
+                self._draw_building(building_x, building_y, building_idx)
+
+        glEnable(GL_LIGHTING)
+
+    def _draw_tree(self, x, y):
+        """Draw a simple tree (trunk + foliage)"""
+        # Tree trunk (brown cylinder)
+        glColor3f(0.4, 0.2, 0.1)
+        trunk_height = 15
+        trunk_radius = 2
+
+        glPushMatrix()
+        glTranslatef(x, y, 0)
+
+        # Draw trunk
+        for i in range(10):
+            z = i * trunk_height / 10
+            glBegin(GL_LINES)
+            glVertex3f(0, 0, z)
+            glVertex3f(0, 0, z + trunk_height / 10)
+            glEnd()
+
+        # Tree foliage (green cone/sphere)
+        glColor3f(0.1, 0.5, 0.1)
+        glTranslatef(0, 0, trunk_height)
+
+        # Draw foliage as sphere
+        quadric = gluNewQuadric()
+        gluSphere(quadric, 8, 6, 6)
+        gluDeleteQuadric(quadric)
+
+        glPopMatrix()
+
+    def _draw_distance_sign(self, x, y, distance):
+        """Draw a distance/corner marker sign"""
+        glColor3f(1.0, 0.5, 0.0)  # Orange sign
+
+        # Sign post
+        glLineWidth(3)
+        glBegin(GL_LINES)
+        glVertex3f(x, y, 0)
+        glVertex3f(x, y, 15)
+        glEnd()
+
+        # Sign board (rectangle)
+        glPushMatrix()
+        glTranslatef(x, y, 12)
+
+        # Draw sign as colored box
+        sign_width = 6
+        sign_height = 4
+        glBegin(GL_QUADS)
+        # Front face
+        glVertex3f(-sign_width/2, 0, -sign_height/2)
+        glVertex3f(sign_width/2, 0, -sign_height/2)
+        glVertex3f(sign_width/2, 0, sign_height/2)
+        glVertex3f(-sign_width/2, 0, sign_height/2)
+        glEnd()
+
+        # Draw distance marker sphere on top
+        glTranslatef(0, 0, sign_height/2 + 2)
+        color_intensity = (distance % 500) / 500.0
+        glColor3f(1.0, color_intensity, 0.0)
+        quadric = gluNewQuadric()
+        gluSphere(quadric, 2, 6, 6)
+        gluDeleteQuadric(quadric)
+
+        glPopMatrix()
+
+    def _draw_building(self, x, y, building_type):
+        """Draw a building/grandstand as a landmark"""
+        # Different colored buildings for variety
+        colors = [
+            (0.7, 0.7, 0.8),  # Light gray
+            (0.8, 0.6, 0.4),  # Brown
+            (0.6, 0.6, 0.7),  # Blue-gray
+            (0.7, 0.5, 0.5),  # Red-gray
+        ]
+        color = colors[building_type % len(colors)]
+        glColor3f(*color)
+
+        building_width = 20
+        building_depth = 15
+        building_height = 25 + (building_type * 5)  # Varying heights
+
+        glPushMatrix()
+        glTranslatef(x, y, building_height/2)
+
+        # Draw building as box
+        w, d, h = building_width/2, building_depth/2, building_height/2
+        glBegin(GL_QUADS)
+
+        # Front face
+        glVertex3f(-w, d, -h)
+        glVertex3f(w, d, -h)
+        glVertex3f(w, d, h)
+        glVertex3f(-w, d, h)
+
+        # Back face
+        glVertex3f(-w, -d, -h)
+        glVertex3f(-w, -d, h)
+        glVertex3f(w, -d, h)
+        glVertex3f(w, -d, -h)
+
+        # Top face
+        glColor3f(color[0] * 0.7, color[1] * 0.7, color[2] * 0.7)
+        glVertex3f(-w, -d, h)
+        glVertex3f(w, -d, h)
+        glVertex3f(w, d, h)
+        glVertex3f(-w, d, h)
+
+        # Left face
+        glColor3f(*color)
+        glVertex3f(-w, -d, -h)
+        glVertex3f(-w, d, -h)
+        glVertex3f(-w, d, h)
+        glVertex3f(-w, -d, h)
+
+        # Right face
+        glVertex3f(w, -d, -h)
+        glVertex3f(w, -d, h)
+        glVertex3f(w, d, h)
+        glVertex3f(w, d, -h)
+
+        glEnd()
+
+        # Add windows (small bright squares)
+        glColor3f(1.0, 1.0, 0.8)
+        window_rows = 3
+        window_cols = 4
+        for row in range(window_rows):
+            for col in range(window_cols):
+                wx = -w + (col + 0.5) * building_width / window_cols - building_width/2
+                wz = -h + (row + 0.5) * building_height / window_rows
+
+                glBegin(GL_QUADS)
+                glVertex3f(wx, d + 0.1, wz)
+                glVertex3f(wx + 2, d + 0.1, wz)
+                glVertex3f(wx + 2, d + 0.1, wz + 2)
+                glVertex3f(wx, d + 0.1, wz + 2)
+                glEnd()
+
+        glPopMatrix()
 
 
 class Renderer3D:
