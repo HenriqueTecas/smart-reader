@@ -6,11 +6,20 @@ This is a 3D OpenGL conversion of the robotics lab simulation that preserves all
 
 ## Features
 
+### Latest Enhancements ✨
+
+- **✅ Fixed Steering Controls** - A/D keys now correctly turn left/right respectively
+- **✅ Collision Detection** - Invisible walls prevent car from going off-track
+- **✅ Enhanced Minimap** - Exact match of 2D implementation with wheel positions and lane vectors
+- **✅ Visual Track Features** - Checkpoints, sector markers, direction arrows, and start/finish line
+- **✅ Spatial Awareness** - Easy to see where you are and which direction to drive
+
 ### 3D Rendering
 - **First-person hood camera view** - Experience the simulation from the driver's perspective
 - **3D track visualization** - São Paulo F1 circuit rendered with realistic road surface and lane markings
 - **Elevated terrain** - Green terrain walls around the track to clearly distinguish the drivable area
 - **3D lane detection markers** - Visual spheres showing detected lane points in the 3D world
+- **Track markers** - Checkpoint poles, sector numbers, and direction arrows
 
 ### Minimap (Top-Right Corner)
 - **Full 2D simulation view** - The original 2D visualization as a minimap
@@ -27,10 +36,12 @@ This is a 3D OpenGL conversion of the robotics lab simulation that preserves all
 
 - **W** - Accelerate
 - **S** - Brake/Reverse
-- **A** - Steer left (deactivates LKA)
-- **D** - Steer right (deactivates LKA)
+- **A** - Steer LEFT (deactivates LKA)
+- **D** - Steer RIGHT (deactivates LKA)
 - **F** - Toggle Lane Keeping Assist (LKA) on/off
 - **ESC** - Exit simulation
+
+**Note:** Steering controls have been fixed to match expected behavior (A=left, D=right).
 
 ## Requirements
 
@@ -99,20 +110,33 @@ python3 robotics_lab_3d.py
 ### Visual Elements
 
 #### 3D Scene
-- Dark gray road surface with white lane boundaries
-- Yellow dashed center line
-- Green elevated terrain walls (30-unit height)
-- Red spheres for left lane detections
-- Cyan spheres for right lane detections
-- Yellow spheres for center line detections
-- Large yellow sphere for LKA lookahead point
+- **Road Surface**: Dark gray asphalt with white lane boundaries and yellow dashed centerline
+- **Terrain Walls**: Green elevated walls (30-unit height) clearly marking track boundaries
+- **Lane Detection Markers**:
+  - Red spheres for left lane boundary detections
+  - Cyan spheres for right lane boundary detections
+  - Yellow spheres for center dotted line detections
+  - Large yellow sphere for LKA lookahead point
+- **Track Features** (NEW):
+  - **Checkpoint Markers**: Cyan poles with spheres at track sides (every 6 points)
+  - **Sector Numbers**: Colored floating spheres above track indicating sector/segment
+  - **Direction Arrows**: Yellow arrows on track surface showing driving direction
+  - **Start/Finish Line**: Red and white tall poles marking the start/finish
+- **Collision Detection**: Invisible walls at track boundaries prevent off-track driving
 
-#### Minimap (400x400px)
-- Track outline with lane markings
-- Camera FOV cone (semi-transparent green)
-- Detected lane points (colored dots)
-- Car representation with heading indicator
-- LKA lookahead point and path
+#### Minimap (400x400px) - Exact Match of 2D Implementation
+- Track outline with lane markings and dashed centerline
+- Camera FOV cone (semi-transparent green) with edge lines
+- Camera position marker (green circle)
+- Front wheel positions (orange left wheel, cyan right wheel)
+- Detected lane points:
+  - Red circles for left lane boundary
+  - Cyan circles for right lane boundary
+  - Dark blue circles for center dotted line
+  - Orange vectors from left wheel to left lane points
+  - Cyan vectors from right wheel to right lane points
+- Car representation with main axis and heading indicator
+- LKA lookahead point and path (when active)
 
 #### HUD
 - LKA status (ACTIVE in green / OFF in red)
