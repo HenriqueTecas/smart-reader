@@ -1363,6 +1363,14 @@ class Minimap:
         pygame.draw.rect(self.surface, (100, 100, 100), (0, 0, self.size, self.size), 3)
         pygame.draw.rect(self.surface, (200, 200, 200), (2, 2, self.size-4, self.size-4), 1)
 
+        # DEBUG: Draw expected bounds rectangle
+        min_scaled = self._world_to_minimap(self.min_x, self.min_y)
+        max_scaled = self._world_to_minimap(self.max_x, self.max_y)
+        pygame.draw.rect(self.surface, (255, 0, 0),
+                        (min_scaled[0], min_scaled[1],
+                         max_scaled[0] - min_scaled[0],
+                         max_scaled[1] - min_scaled[1]), 1)
+
         # Draw track
         self._draw_track_2d()
 
@@ -1379,6 +1387,11 @@ class Minimap:
 
         # Draw car (simple representation)
         self._draw_car_2d(car)
+
+        # DEBUG: Draw scale info
+        font = pygame.font.Font(None, 20)
+        scale_text = font.render(f"Scale: {self.scale:.3f}", True, (255, 255, 0))
+        self.surface.blit(scale_text, (5, 5))
 
         return self.surface
 
